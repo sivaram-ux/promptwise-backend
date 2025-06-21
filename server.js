@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -25,8 +24,15 @@ const conversationSchema = new mongoose.Schema({
     {
       turnIndex: Number,
       userPrompt: String,
-      optimisedPrompt: String,
-      llmOutput: String,
+      chatGptRefinement: String,
+      deepSeekRefinement: String,
+      qwenRefinement: String,
+      grokRefinement: String,
+      finalRefinedPrompt: String,
+      originalPromptStrengths: [String],
+      originalPromptWeaknesses: [String],
+      refinedPromptAdvantages: [String],
+      improvementSuggestions: [String],
       timestamp: { type: Date, default: Date.now }
     }
   ],
@@ -38,8 +44,21 @@ const Conversation = mongoose.model('Conversation', conversationSchema);
 
 // Start a new conversation
 app.post('/api/conversation/start', async (req, res) => {
-  const { userPrompt, optimisedPrompt, llmOutput, userId } = req.body;
-  if (!userPrompt || !optimisedPrompt || !llmOutput) {
+  const {
+    userPrompt,
+    chatGptRefinement,
+    deepSeekRefinement,
+    qwenRefinement,
+    grokRefinement,
+    finalRefinedPrompt,
+    originalPromptStrengths,
+    originalPromptWeaknesses,
+    refinedPromptAdvantages,
+    improvementSuggestions,
+    userId
+  } = req.body;
+
+  if (!userPrompt || !finalRefinedPrompt) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -52,8 +71,15 @@ app.post('/api/conversation/start', async (req, res) => {
       {
         turnIndex: 1,
         userPrompt,
-        optimisedPrompt,
-        llmOutput
+        chatGptRefinement,
+        deepSeekRefinement,
+        qwenRefinement,
+        grokRefinement,
+        finalRefinedPrompt,
+        originalPromptStrengths,
+        originalPromptWeaknesses,
+        refinedPromptAdvantages,
+        improvementSuggestions
       }
     ]
   });
@@ -69,10 +95,22 @@ app.post('/api/conversation/start', async (req, res) => {
 
 // Append a new turn
 app.patch('/api/conversation/:id/append', async (req, res) => {
-  const { userPrompt, optimisedPrompt, llmOutput } = req.body;
+  const {
+    userPrompt,
+    chatGptRefinement,
+    deepSeekRefinement,
+    qwenRefinement,
+    grokRefinement,
+    finalRefinedPrompt,
+    originalPromptStrengths,
+    originalPromptWeaknesses,
+    refinedPromptAdvantages,
+    improvementSuggestions
+  } = req.body;
+
   const { id: conversationId } = req.params;
 
-  if (!userPrompt || !optimisedPrompt || !llmOutput) {
+  if (!userPrompt || !finalRefinedPrompt) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -84,8 +122,15 @@ app.patch('/api/conversation/:id/append', async (req, res) => {
     conversation.turns.push({
       turnIndex,
       userPrompt,
-      optimisedPrompt,
-      llmOutput
+      chatGptRefinement,
+      deepSeekRefinement,
+      qwenRefinement,
+      grokRefinement,
+      finalRefinedPrompt,
+      originalPromptStrengths,
+      originalPromptWeaknesses,
+      refinedPromptAdvantages,
+      improvementSuggestions
     });
     conversation.updatedAt = new Date();
 
